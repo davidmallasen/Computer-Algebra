@@ -2,7 +2,9 @@
 Chinese remainder theorem algorithm (compute the inverse).
 """
 import operator
-from sage.all import ZZ
+from sage.all import *
+
+from extended_euclidean_algorithm import extended_euclidean_algorithm
 
 
 def chinese_remainder(residues, moduli):
@@ -36,9 +38,9 @@ def chinese_remainder(residues, moduli):
     if not residues:
         return ZZ(0)
 
-    parent_ = residues[0].parent()
+    domain = residues[0].parent()
     try:
-        if not parent_.is_euclidean_domain():
+        if not domain.is_euclidean_domain():
             raise TypeError("All the elements of both lists must be in an Euclidean Domain")
     except AttributeError:  # In case parent_ doesnt have the is_euclidean_domain method
         raise TypeError("All the elements of both lists must be in an Euclidean Domain")
@@ -50,11 +52,11 @@ def chinese_remainder(residues, moduli):
 
     # Compute the actual solution
     m = reduce(operator.mul, moduli)
-    c = 0
+    c = domain.zero()
     for (v_i, m_i) in zip(residues, moduli):
         quo, _ = m.quo_rem(m_i)
-        # ..., s_i, ... = extended_euclid(..., quo, ...)    TODO
-        s_i = 0  # TODO
+        _, s, _, _ = extended_euclidean_algorithm(quo, m_i)
+        s_i = s[-2]     # s_i * quo + t_i * m_i = 1
         _, c_i = (v_i * s_i).quo_rem(m_i)
         c += c_i * quo
     return c
@@ -62,7 +64,26 @@ def chinese_remainder(residues, moduli):
 
 def main():
     """ Execute the examples. """
-    print chinese_remainder([ZZ(2), ZZ(7)], [ZZ(11), ZZ(13)])  # Sol = 46
+    _example([ZZ(2), ZZ(7)], [ZZ(11), ZZ(13)])  # Expected 46
+    _example([ZZ(2), ZZ(3), ZZ(2)], [ZZ(3), ZZ(5), ZZ(7)])  # Expected 128
+
+    R = PolynomialRing(QQ, 'x')
+    f = R('x - 1')
+    g = R('x - 2')
+    _example([R('2'), R('3')], [f, g])  # Not working!
+    print crt([R('2'), R('3')], [f, g])  # Sage prebuilt function
+
+
+def _example(residues, moduli):
+    """ Executes and verifies an example. Prints the output."""
+    ans = chinese_remainder(residues, moduli)
+    correct = true
+    for r, m in zip(residues, moduli):
+        _, rem = ans.quo_rem(m)
+        if rem != r:
+            correct = false
+            break
+    print correct, ans
 
 
 if __name__ == '__main__':
