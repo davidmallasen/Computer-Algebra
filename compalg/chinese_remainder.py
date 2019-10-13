@@ -7,6 +7,31 @@ from sage.all import *
 from extended_euclidean_algorithm import extended_euclidean_algorithm
 
 
+def positive_bezout_coefficients(a, b):
+    """
+    Return x, y such that x * a + y * b = 1, assuming that a and b are coprime. Will throw an error if a and b are not
+    coprime.
+
+    Parameters
+    ----------
+    a : the first element.
+    b : the second element
+
+    Returns
+    -------
+    x, y such that x * a + y * b = 1.
+    """
+    domain = a.parent()
+    r, s, t, _ = extended_euclidean_algorithm(a, b)
+    mcd = r[-2]
+    if mcd == domain.one():
+        return s[-2], t[-2]
+    elif mcd == -domain.one():
+        return -s[-2], -t[-2]
+    else:
+        raise ValueError('Arguments should be coprime, but their mcd is {mcd}'.format(mcd=mcd))
+
+
 def chinese_remainder(residues, moduli):
     """
     Chinese Remainder Algorithm (CRA).
@@ -27,7 +52,6 @@ def chinese_remainder(residues, moduli):
     -------
     A solution to the Chinese Remainder Theorem for ''residues'' and ''moduli''.
     If the lists are empty, returns ZZ(0).
-
     """
     # Check input parameters, if the lists are empty, return ZZ(0)
     if not isinstance(residues, list) or not isinstance(moduli, list):
@@ -55,12 +79,10 @@ def chinese_remainder(residues, moduli):
     c = domain.zero()
     for (v_i, m_i) in zip(residues, moduli):
         quo, _ = m.quo_rem(m_i)
-        _, s, _, _ = extended_euclidean_algorithm(quo, m_i)
-        s_i = s[-2]     # s_i * quo + t_i * m_i = 1
+        s_i, _ = positive_bezout_coefficients(quo, m_i)   # s_i * quo + t_i * m_i = 1
         _, c_i = (v_i * s_i).quo_rem(m_i)
         c += c_i * quo
     return c
-
 
 def main():
     """ Execute the examples. """
@@ -70,8 +92,7 @@ def main():
     R = PolynomialRing(QQ, 'x')
     f = R('x - 1')
     g = R('x - 2')
-    _example([R('2'), R('3')], [f, g])  # Not working!
-    print crt([R('2'), R('3')], [f, g])  # Sage prebuilt function
+    _example([R('2'), R('3')], [f, g])
 
 
 def _example(residues, moduli):
