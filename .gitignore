@@ -1,2 +1,5 @@
 # PyCharm .idea folder
 .idea/
+
+# Python bytecode files
+*.pyc
