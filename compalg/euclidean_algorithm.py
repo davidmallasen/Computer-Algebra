@@ -29,8 +29,7 @@ def euclidean_algorithm(f, g):
     if not domain.is_euclidean_domain():
         raise ValueError("Arguments should belong to an euclidean domain")
 
-    a = f
-    b = g
+    a, b = f, g
 
     while b != domain.zero():
         _, rem = a.quo_rem(b)
