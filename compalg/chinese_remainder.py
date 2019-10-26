@@ -1,7 +1,6 @@
 """
 Chinese remainder theorem algorithm (compute the inverse).
 """
-import operator
 from sage.all import *
 
 from extended_euclidean_algorithm import extended_euclidean_algorithm
@@ -84,6 +83,7 @@ def chinese_remainder(residues, moduli):
         c += c_i * quo
     return c
 
+
 def main():
     """ Execute the examples. """
     _example([ZZ(2), ZZ(7)], [ZZ(11), ZZ(13)])  # Expected 46
@@ -92,7 +92,7 @@ def main():
     R = PolynomialRing(QQ, 'x')
     f = R('x - 1')
     g = R('x - 2')
-    _example([R('2'), R('3')], [f, g])
+    _example([R('2'), R('3')], [f, g])  # Expected x + 1
 
 
 def _example(residues, moduli):
