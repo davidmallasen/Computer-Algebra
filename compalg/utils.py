@@ -15,5 +15,5 @@ def generate_list(generator, first_element, limit):
 
 
 def filter_with_mask(mask, elements):
-    mask_bits = list(bin(mask)[2:])
+    mask_bits = reversed(list(bin(mask)[2:]))
     return map(lambda p: p[1], filter(lambda p: p[0] == '1', zip(mask_bits, elements)))

@@ -193,6 +193,8 @@ def is_irreducible(f):
     -------
     A boolean representing whether f is irreducible or not.
     """
+    if f.degree() <= 1:
+        return True
 
     poly_field = f.parent()
     base_field = poly_field.base()
@@ -236,7 +238,14 @@ def main():
     print is_irreducible(f1)    # False
     print is_irreducible(f2)    # False
 
-    for degree in range(1,10):
+    # x^2 - 1 reducible over Z[x] and thus over the finite fields
+    f1 = R1('x^2 - 1')
+    f2 = R2('x^2 - 1')
+
+    print is_irreducible(f1)    # False
+    print is_irreducible(f2)    # False
+
+    for degree in range(1, 10):
         # Some irreducible pols
         f1 = R1.irreducible_element(degree)
         f2 = R2.irreducible_element(degree)
