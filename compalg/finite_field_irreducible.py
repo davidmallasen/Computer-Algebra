@@ -2,38 +2,10 @@
 Irreducibility check in a finite field.
 """
 from sage.all import *
-from utils import generate_list, filter_with_mask
+
 from euclidean_algorithm import euclidean_algorithm
-
-
-def __repeated_square(a, n, mod=None):
-    """
-    Computes a^n % mod, with a belonging to a ring with 1 (not checked) and n > 0.
-    """
-    ns = list(bin(n)[2:])[1:]
-
-    b = a
-    for coef in ns:
-        if coef == '1':
-            b = (b * b * a)
-        else:
-            b = (b * b)
-
-        if mod is not None:
-            b %= mod
-
-    return b
-
-
-def __horners_evaluation(f, u):
-    """
-    Fast evaluation of f(u).
-    """
-    if f.is_zero():
-        return f.parent().base().zero()
-
-    coefs = reversed(f.coefficients(sparse=False))
-    return reduce(lambda acc, next: acc * u + next, coefs)
+from auxiliary_algorithms import repeated_square, horners_evaluation
+from utils import generate_list, filter_with_mask
 
 
 def __next_power_of_2(x):
@@ -159,7 +131,7 @@ def __fast_modular_composition(f, g, h):
 
     poly_poly_ring = PolynomialRing(poly_ring, 'y')
     r = poly_poly_ring([poly_ring(list(row)) for row in BA.rows()])
-    return __horners_evaluation(r, h_power) % f
+    return horners_evaluation(r, h_power) % f
 
 
 def __prime_divisors(n):
@@ -205,7 +177,7 @@ def is_irreducible(f):
     n = f.degree()
     q = base_field.order()
     x = poly_field(poly_field.variable_name())
-    x_power = __repeated_square(x, q, f)
+    x_power = repeated_square(x, q, f)
 
     x_powers_of_two = generate_list(lambda x: __fast_modular_composition(f, x, x), x_power, n.nbits())
     x_q_n = reduce(lambda a, b: __fast_modular_composition(f, a, b), filter_with_mask(n, x_powers_of_two))
