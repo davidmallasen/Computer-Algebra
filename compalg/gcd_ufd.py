@@ -1,10 +1,9 @@
 """
 GCD computing for members of any UCD.
 """
-import operator
-from euclidean_algorithm import euclidean_algorithm
 from sage.all import *
 from sage.rings.polynomial.polynomial_ring import is_PolynomialRing
+from euclidean_algorithm import euclidean_algorithm
 
 
 def __poly_content(f):
@@ -76,6 +75,15 @@ def gcd_ufd(f, g):
 
     if not base_domain.is_euclidean_domain():
         raise ValueError("The base ring for the polynomial ring must be an Euclidean domain")
+
+    if f == domain.zero():
+        if g == domain.zero():
+            return domain.zero()
+        else:
+            return g
+    else:
+        if g == domain.zero():
+            return f
 
     cont_f, cont_g = __poly_content(f), __poly_content(g)
     cont_result = euclidean_algorithm(cont_f, cont_g)
