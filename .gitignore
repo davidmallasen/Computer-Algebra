@@ -3,3 +3,6 @@
 
 # Python bytecode files
 *.pyc
+
+# Virtual environment
+venv/
