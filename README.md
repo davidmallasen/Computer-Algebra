@@ -12,3 +12,9 @@ p,f irreducibles in Zp \[x] -> K:=Zp\[x] / (f(x)) |K|=p^(deg f).
 - Berlekamp's factorization algorithm in finite fields.
 - Factorization algorithms in Z\[x].
 - AKS primality testing algorithm.
+
+Extra:
+
+- Buchberger division algorithm.
+- Check if element belongs to given ideal.
+- Multivariable division algorithm, with unique remainder
