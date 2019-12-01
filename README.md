@@ -16,5 +16,5 @@ p,f irreducibles in Zp \[x] -> K:=Zp\[x] / (f(x)) |K|=p^(deg f).
 Extra:
 
 - Buchberger division algorithm.
-- Check if element belongs to given ideal.
+- Ideal membership algorithm.
 - Multivariable division algorithm, with unique remainder
