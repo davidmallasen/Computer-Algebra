@@ -3,10 +3,10 @@ Chinese remainder theorem algorithm (compute the inverse).
 """
 from sage.all import *
 
-from extended_euclidean_algorithm import extended_euclidean_algorithm
+from extended_euclidean_algorithm import normalized_extended_euclidean_algorithm
 
 
-def positive_bezout_coefficients(a, b):
+def positive_bezout_coefficients(a, b, normal=None):
     """
     Return x, y such that x * a + y * b = 1, assuming that a and b are coprime. Will throw an error if a and b are not
     coprime.
@@ -15,23 +15,23 @@ def positive_bezout_coefficients(a, b):
     ----------
     a : the first element.
     b : the second element
+    normal : a function R -> R, that returns a normal form for a given element (see normalized extended euclidean
+            algorithm for more info).
 
     Returns
     -------
     x, y such that x * a + y * b = 1.
     """
     domain = a.parent()
-    r, s, t, _ = extended_euclidean_algorithm(a, b)
+    r, s, t, _ = normalized_extended_euclidean_algorithm(a, b, normal)
     mcd = r[-2]
     if mcd == domain.one():
         return s[-2], t[-2]
-    elif mcd == -domain.one():
-        return -s[-2], -t[-2]
     else:
         raise ValueError('Arguments should be coprime, but their mcd is {mcd}'.format(mcd=mcd))
 
 
-def chinese_remainder(residues, moduli):
+def chinese_remainder(residues, moduli, normal=None):
     """
     Chinese Remainder Algorithm (CRA).
 
@@ -41,11 +41,10 @@ def chinese_remainder(residues, moduli):
 
     Parameters
     ----------
-    residues : list
-        List of residues as stated above.
-
-    moduli : list
-        List of pairwise coprime moduli as stated above.
+    residues : a list of residues as stated above.
+    moduli : a list of pairwise coprime moduli as stated above.
+    normal : a function R -> R, that returns a normal form for a given element (see normalized extended euclidean
+            algorithm for more info).
 
     Returns
     -------
@@ -78,7 +77,7 @@ def chinese_remainder(residues, moduli):
     c = domain.zero()
     for (v_i, m_i) in zip(residues, moduli):
         quo, _ = m.quo_rem(m_i)
-        s_i, _ = positive_bezout_coefficients(quo, m_i)   # s_i * quo + t_i * m_i = 1
+        s_i, _ = positive_bezout_coefficients(quo, m_i, normal)   # s_i * quo + t_i * m_i = 1
         _, c_i = (v_i * s_i).quo_rem(m_i)
         c += c_i * quo
     return c

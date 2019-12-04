@@ -1,7 +1,7 @@
 """
 Computation of the inverse in a finite field.
 """
-from extended_euclidean_algorithm import extended_euclidean_algorithm
+from extended_euclidean_algorithm import normalized_extended_euclidean_algorithm
 from sage.all import *
 
 
@@ -32,8 +32,8 @@ def inverse_element(a, f_mod):
     if not base_field.is_field() or not base_field.is_finite() or not base_field.characteristic().is_prime():
         raise ValueError("The base field must be a finite field with a prime number of elements")
 
-    r, _, t, _ = extended_euclidean_algorithm(f_mod, a)
-    return t[-2] * r[-2]   # Product by r[-2] to get the inverse if we calculate gcd() = -1
+    _, _, t, _ = normalized_extended_euclidean_algorithm(f_mod, a)
+    return t[-2]
 
 
 def main():
@@ -43,6 +43,12 @@ def main():
     f = R('x^3 - x + 2')
     a = R('x^2')
     print(inverse_element(a, f))    # Expected x^2 + 2x - 1
+
+    Z11 = GF(11)
+    R = PolynomialRing(Z11, 'x')
+    f = R('x')
+    a = R(5)
+    print inverse_element(a, f)
 
 
 if __name__ == '__main__':
