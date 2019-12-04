@@ -5,7 +5,25 @@ from extended_euclidean_algorithm import normalized_extended_euclidean_algorithm
 from sage.all import *
 
 
-def inverse_element(a, f_mod):
+def inverse_element(a):
+    """
+    Inverse in a finite field.
+
+    Parameters
+    ----------
+    a : the element to be inverted, belonging to a Galois field.
+
+    Returns
+    -------
+    Its inverse.
+    """
+    ring = a.parent()
+    polynomial = ring.polynomial()
+
+    return ring(__inverse_element(a.polynomial(), polynomial))
+
+
+def __inverse_element(a, f_mod):
     """
     Inverse in a finite field.
 
@@ -42,13 +60,18 @@ def main():
     R = PolynomialRing(Z5, 'x')
     f = R('x^3 - x + 2')
     a = R('x^2')
-    print(inverse_element(a, f))    # Expected x^2 + 2x - 1
+    print(__inverse_element(a, f))    # Expected x^2 + 2x - 1
 
     Z11 = GF(11)
     R = PolynomialRing(Z11, 'x')
     f = R('x')
     a = R(5)
-    print inverse_element(a, f)
+    print __inverse_element(a, f)
+
+    Z9 = GF(9)
+    a = Z9(Z9.variable_name())
+    expected = Z9.one().quo_rem(a)[0]
+    print 'Expected {e}, got {a}'.format(e=expected, a=inverse_element(a))
 
 
 if __name__ == '__main__':
