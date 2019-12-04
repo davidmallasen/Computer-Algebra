@@ -232,6 +232,7 @@ def __form_matrix_Q(f):
     """
     Given a polynomial f of degree n in F_q[x], calculate the Q matrix required by Berlekamp's algorithm.
     """
+
     base_field = f.parent().base()
     q = base_field.order()
 
@@ -256,11 +257,9 @@ def __null_space_basis(M):
     Given a square matrix M, we return a basis {v_1, ..., v_k} for the null space {v : v*M = 0} of M. The algorithm does
     this by transforming M to triangular idempotent form using gaussian elimination.
     """
+
     if M.nrows() != M.ncols():
         raise ValueError("M must be a square matrix")
-
-    field = M[0, 0].parent()
-    print field
 
     n = M.nrows()
     for k in range(n):
@@ -270,7 +269,7 @@ def __null_space_basis(M):
             i += 1
         if i < n:
             # Normalize column i and interchange this with column k
-            inverse = inverse_element(M[k, i], field.one())
+            inverse = inverse_element(M[k, i])
             for j in range(n):
                 M[j, i] = M[j, i] * inverse
 
@@ -283,21 +282,21 @@ def __null_space_basis(M):
                 if j != k:
                     M[:, j] = M[:, j] - M[:, k]*M[k, j]
 
-    # Convert M to M - I
-    M -= identity_matrix(n)
+    # Convert M to I - M
+    M = identity_matrix(n) - M
 
     # Read off nonzero rows of M
-    L = []
+    v = []
     j = 0
-    zeroes = [0]*n
 
     while j < n:
-        while j < n and M[j, :] == zeroes:
+        while j < n and all([M[j, i] == 0 for i in range(n)]):
             j += 1
         if j < n:
-            L.append(M[j, :])
+            v.append(M[j, :].list())
+            j += 1
 
-    return L
+    return v
 
 
 def __berlekamp(f):
@@ -305,13 +304,30 @@ def __berlekamp(f):
     Given a square-free polynomial f in a finite field F_q[x], calculate irreducible factors f_1(x), ..., f_k(x) such
     that f(x) = f_1(x) * ... * f_k(x)
     """
-    Q = __form_matrix_Q(f)
-    L = __null_space_basis(Q)
 
-    factors = [f]
+    field = f.parent()
+    q = field.base().order()
+
+    Q = __form_matrix_Q(f)
+    v = __null_space_basis(Q - identity_matrix(Q.ncols()))
+
+    factors = {f}
+    factors_aux = factors.copy()
     r = 1
-    while len(factors) < len(L):
-        pass  #TODO
+    while len(factors) < len(v):
+        for factor in factors:
+            for s in range(q):
+                g = gcd_ufd(field(v[r]) - s, factor)
+                if g != field.one() and g != factor:
+                    factors_aux.discard(factor)
+                    factor, _ = factor.quo_rem(g)
+                    factors_aux.add(factor)
+                    factors_aux.add(g)
+                if len(factors_aux) == len(v):
+                    return factors_aux
+            r += 1
+        factors = factors_aux.copy()
+    return factors
 
 
 def berlekamp_poly_factorization(f):
@@ -329,10 +345,6 @@ def berlekamp_poly_factorization(f):
     -------
     The factorization [(f_1, s_1), ..., (f_k, s_k)] of f.
     """
-    # ntb-v2.pdf p.538 seccion 20.5
-    #
-    # Algorithms for computer algebra - Geddes et al.pdf p.370 (del pdf) secicon 8.4.
-    # Hay a continuacion otro algoritmo para q grande
 
     field = f.parent()
     base_field = field.base()
@@ -356,8 +368,8 @@ def berlekamp_poly_factorization(f):
 def main():
     """ Execute the examples. """
 
-    F3 = GF(3)
-    R = PolynomialRing(F3, 'x')
+    R = PolynomialRing(GF(3), 'x')
+    R2 = PolynomialRing(GF(11), 'x')
 
     f1 = R('(x^5 + x^2 + x + 1)^2 * x^5')
     print squarefree_decomposition(f1)  # Expected: [(x^5 + x^2 + x + 1, 2), (x, 5)]
@@ -376,12 +388,12 @@ def main():
 
     f6 = R('x^9 + x^8 - x^7 + x^6 - x^4 - x^3 - x^2')
     print three_step_poly_factorization(f6)  # Expected: [(x^2 + x + 2, 1), (x^2 + 1, 1), (x^3 + 2*x + 1, 1), (x, 2)]
+    print berlekamp_poly_factorization(f6)
+
+    f7 = R2('x^6 - 3*x^5 + x^4 - 3*x^3 - x^2 - 3*x + 1')
+    print three_step_poly_factorization(f7)  # Expected: [(x + 1, 1), (x^2 + 5*x + 3, 1), (x^3 + 2*x^2 + 3*x + 4, 1)]
+    print berlekamp_poly_factorization(f7)
 
 
 if __name__ == '__main__':
-    #main()
-    R = PolynomialRing(GF(11), 'x')
-    a = R('x^6 - 3*x^5 + x^4 - 3*x^3 - x^2 - 3*x + 1')
-    Q = __form_matrix_Q(a)
-    print Q
-    print __null_space_basis(Q)
+    main()
