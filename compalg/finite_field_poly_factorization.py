@@ -1,10 +1,12 @@
 """
-Factoring algorithm of a polynomial in a finite field.
+Factoring algorithms of a polynomial in a finite field.
+Includes the three step polynomial factorization algorithm and Berlekamp's algorithm.
 """
 from sage.all import *
 
 from auxiliary_algorithms import repeated_square, poly_pth_root
 from gcd_ufd import gcd_ufd
+from finite_field_inverse import inverse_element
 
 
 def squarefree_decomposition(f):
@@ -31,9 +33,9 @@ def squarefree_decomposition(f):
         raise ValueError("The base field must be a finite field with a prime power number of elements")
 
     if f.degree() < 1:
-        return ValueError("f must be a nonconstant polynomial")
+        raise ValueError("f must be a nonconstant polynomial")
     if not f.is_monic():
-        return ValueError("f must be a monic polynomial")
+        raise ValueError("f must be a monic polynomial")
 
     p = base_field.characteristic()
     fs = []
@@ -82,11 +84,11 @@ def distinct_degree_decomposition(f):
         raise ValueError("The base field must be a finite field with a prime power number of elements")
 
     if f.degree() < 1:
-        return ValueError("f must be a nonconstant polynomial")
+        raise ValueError("f must be a nonconstant polynomial")
     if not f.is_monic():
-        return ValueError("f must be a monic polynomial")
+        raise ValueError("f must be a monic polynomial")
     if not f.is_squarefree():
-        return ValueError("f must be a squarefree polynomial")
+        raise ValueError("f must be a squarefree polynomial")
 
     q = base_field.order()
 
@@ -176,23 +178,25 @@ def equal_degree_decomposition(f, d):
         raise ValueError("The base field must be a finite field with an odd prime power number of elements")
 
     if f.degree() < 1:
-        return ValueError("f must be a nonconstant polynomial")
+        raise ValueError("f must be a nonconstant polynomial")
     if not f.is_monic():
-        return ValueError("f must be a monic polynomial")
+        raise ValueError("f must be a monic polynomial")
     if not f.is_squarefree():
-        return ValueError("f must be a squarefree polynomial")
+        raise ValueError("f must be a squarefree polynomial")
 
     if f.degree() % d != 0:
-        return ValueError("d must be a divisor of degree(f)")
+        raise ValueError("d must be a divisor of degree(f)")
 
     return __recursive_equal_degree_decomposition(f, d)
 
 
-def poly_factorization(f):
+def three_step_poly_factorization(f):
     """
-    Polynomial factorization in a finite field
+    Polynomial factorization in a finite field.
 
     Factors a nonconstant monic polynomial f in a finite field F_q[x], where q is an odd prime power q = p^r.
+    Applies first squarefree decomposition, then computes the distinct degree decomposition on each of the squarefree
+    factors and finally obtains the irreducible factors by calculating the equal degree decomposition.
 
     Parameters
     ----------
@@ -203,11 +207,148 @@ def poly_factorization(f):
     The factorization [(f_1, s_1), ..., (f_k, s_k)] of f.
     """
 
+    field = f.parent()
+    base_field = field.base()
+
+    if not base_field.is_field() or not base_field.is_finite() or not base_field.characteristic().is_prime() \
+            or base_field.characteristic() == 2:
+        raise ValueError("The base field must be a finite field with an odd prime power number of elements")
+
+    if f.degree() < 1:
+        raise ValueError("f must be a nonconstant polynomial")
+    if not f.is_monic():
+        raise ValueError("f must be a monic polynomial")
+
     irreducible_factors = []
     for squarefree, power in squarefree_decomposition(f):
         for distinct_degree, d in distinct_degree_decomposition(squarefree):
             for irreducible_factor in equal_degree_decomposition(distinct_degree, d):
                 irreducible_factors.append((irreducible_factor, power))
+
+    return irreducible_factors
+
+
+def __form_matrix_Q(f):
+    """
+    Given a polynomial f of degree n in F_q[x], calculate the Q matrix required by Berlekamp's algorithm.
+    """
+    base_field = f.parent().base()
+    q = base_field.order()
+
+    n = f.degree()
+    a = f.list()
+
+    r = vector(base_field, [1] + [0]*(n - 1))
+
+    Q = matrix(base_field, n)
+    Q[0, :] = r
+
+    for m in range(1, (n - 1)*q + 1):
+        r = vector(base_field, [-r[n - 1] * a[0]] + [r[i - 1] - r[n - 1]*a[i] for i in range(1, n)])
+        if m % q == 0:
+            Q[m / q, :] = r
+
+    return Q
+
+
+def __null_space_basis(M):
+    """
+    Given a square matrix M, we return a basis {v_1, ..., v_k} for the null space {v : v*M = 0} of M. The algorithm does
+    this by transforming M to triangular idempotent form using gaussian elimination.
+    """
+    if M.nrows() != M.ncols():
+        raise ValueError("M must be a square matrix")
+
+    field = M[0, 0].parent()
+    print field
+
+    n = M.nrows()
+    for k in range(n):
+        # Search for pivot element
+        i = k
+        while i < n and M[k, i] == 0:
+            i += 1
+        if i < n:
+            # Normalize column i and interchange this with column k
+            inverse = inverse_element(M[k, i], field.one())
+            for j in range(n):
+                M[j, i] = M[j, i] * inverse
+
+            tmp = M[:, i]
+            M[:, i] = M[:, k]
+            M[:, k] = tmp
+
+            # Eliminate rest of row k via column operations
+            for j in range(n):
+                if j != k:
+                    M[:, j] = M[:, j] - M[:, k]*M[k, j]
+
+    # Convert M to M - I
+    M -= identity_matrix(n)
+
+    # Read off nonzero rows of M
+    L = []
+    j = 0
+    zeroes = [0]*n
+
+    while j < n:
+        while j < n and M[j, :] == zeroes:
+            j += 1
+        if j < n:
+            L.append(M[j, :])
+
+    return L
+
+
+def __berlekamp(f):
+    """
+    Given a square-free polynomial f in a finite field F_q[x], calculate irreducible factors f_1(x), ..., f_k(x) such
+    that f(x) = f_1(x) * ... * f_k(x)
+    """
+    Q = __form_matrix_Q(f)
+    L = __null_space_basis(Q)
+
+    factors = [f]
+    r = 1
+    while len(factors) < len(L):
+        pass  #TODO
+
+
+def berlekamp_poly_factorization(f):
+    """
+    Polynomial factorization in a finite field.
+
+    Factors a nonconstant monic polynomial f in a finite field F_q[x], where q is a prime power q = p^r.
+    Applies berlekamp's algorithm.
+
+    Parameters
+    ----------
+    f : A nonconstant, monic polynomial in F_q[x].
+
+    Returns
+    -------
+    The factorization [(f_1, s_1), ..., (f_k, s_k)] of f.
+    """
+    # ntb-v2.pdf p.538 seccion 20.5
+    #
+    # Algorithms for computer algebra - Geddes et al.pdf p.370 (del pdf) secicon 8.4.
+    # Hay a continuacion otro algoritmo para q grande
+
+    field = f.parent()
+    base_field = field.base()
+
+    if not base_field.is_field() or not base_field.is_finite() or not base_field.characteristic().is_prime():
+        raise ValueError("The base field must be a finite field with a prime power number of elements")
+
+    if f.degree() < 1:
+        raise ValueError("f must be a nonconstant polynomial")
+    if not f.is_monic():
+        raise ValueError("f must be a monic polynomial")
+
+    irreducible_factors = []
+    for squarefree, power in squarefree_decomposition(f):
+        for irreducible_factor in __berlekamp(squarefree):
+            irreducible_factors.append((irreducible_factor, power))
 
     return irreducible_factors
 
@@ -234,8 +375,13 @@ def main():
     print equal_degree_decomposition(f5, 2)  # Expected: [x^2 + 1, x^2 + x + 2]
 
     f6 = R('x^9 + x^8 - x^7 + x^6 - x^4 - x^3 - x^2')
-    print poly_factorization(f6)  # Expected: [(x^2 + x + 2, 1), (x^2 + 1, 1), (x^3 + 2*x + 1, 1), (x, 2)]
+    print three_step_poly_factorization(f6)  # Expected: [(x^2 + x + 2, 1), (x^2 + 1, 1), (x^3 + 2*x + 1, 1), (x, 2)]
 
 
 if __name__ == '__main__':
-    main()
+    #main()
+    R = PolynomialRing(GF(11), 'x')
+    a = R('x^6 - 3*x^5 + x^4 - 3*x^3 - x^2 - 3*x + 1')
+    Q = __form_matrix_Q(a)
+    print Q
+    print __null_space_basis(Q)
