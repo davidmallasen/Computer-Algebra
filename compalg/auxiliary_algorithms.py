@@ -55,3 +55,10 @@ def poly_pth_root(f):
             root_coefs[j / p] = field(repeated_square(coef, q / p, q))  # a_j^{p^(r-1)} = a_j^{q/p}
 
     return field(root_coefs)
+
+
+def poly_content(f):
+    """
+    Computes the polynomial content of f in Z[x]. The polynomial content is the gcd of its coefficients.
+    """
+    return f.parent().base()(gcd(map(ZZ, f.coefficients())))
