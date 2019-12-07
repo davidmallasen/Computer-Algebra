@@ -27,8 +27,8 @@ def __hensel_step(m, f, g, h, s, t):
     and deg(t') < deg(g').
     """
 
-    R = PolynomialRing(GF(m**2), 'x')
-    # R = PolynomialRing(IntegerModRing(m), 'x')
+    R = PolynomialRing(IntegerModRing(m ** 2), 'x')
+    ZZR = PolynomialRing(ZZ, 'x')
     f = R(f)
     g = R(g)
     h = R(h)
@@ -36,7 +36,7 @@ def __hensel_step(m, f, g, h, s, t):
     t = R(t)
 
     e = f - g*h
-    q, r = (s*e).quo_rem(h)
+    q, r = (s * e).quo_rem(h)
     g_ = g + t*e + q*g
     h_ = h + r
 
@@ -45,7 +45,7 @@ def __hensel_step(m, f, g, h, s, t):
     s_ = s - d
     t_ = t - t*b - c*g_
 
-    return g_, h_, s_, t_
+    return ZZR(g_), ZZR(h_), ZZR(s_), ZZR(t_)
 
 
 def __multifactor_hensel_lifting(f, p, l, modular_factors):
@@ -183,7 +183,7 @@ def hensel_lifting_poly_factorization(f):
 def main():
     """ Execute the examples. """
 
-    R = PolynomialRing(GF(5), 'x')
+    R = PolynomialRing(ZZ, 'x')
     f = R('x^4 - 1')
     g = R('x^3 + 2*x^2 - x - 2')
     h = R('x - 2')
