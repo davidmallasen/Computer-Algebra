@@ -27,7 +27,7 @@ def __hensel_step(m, f, g, h, s, t):
     and deg(t') < deg(g').
     """
 
-    R = PolynomialRing(IntegerModRing(m ** 2), 'x')
+    R = PolynomialRing(IntegerModRing(m**2), 'x')
     ZZR = PolynomialRing(ZZ, 'x')
     f = R(f)
     g = R(g)
@@ -36,7 +36,7 @@ def __hensel_step(m, f, g, h, s, t):
     t = R(t)
 
     e = f - g*h
-    q, r = (s * e).quo_rem(h)
+    q, r = (s*e).quo_rem(h)
     g_ = g + t*e + q*g
     h_ = h + r
 
@@ -53,8 +53,8 @@ def __multifactor_hensel_lifting(f, p, l, modular_factors):
     Parameters
     ----------
     f: Polynomial in Z[x] of degree n >= 1 such that its leading coefficient is a unit modulo p.
-    p: an integer.
-    l: a natural number.
+    p: an integer as needed by f and modular_factors.
+    l: a natural number as needed by modular_factors.
     modular_factors: monic, nonconstant polynomials f_1, ..., f_r in Z[x] that are pairwise Bezout-coprime modulo p and
                         satisfy f = lc(f) * f_1 * ... * f_r mod p
 
@@ -63,23 +63,30 @@ def __multifactor_hensel_lifting(f, p, l, modular_factors):
     Monic polynomials f*_1, ..., f*_r in Z[x] with f = lc(f) * f*_1 * ... * f*_r mod p^l and f*_i = f_i mod p for all i.
     """
 
-    domain = f.parent()
-    lifting_domain = PolynomialRing(GF(p**l), 'x')
+    Zp = PolynomialRing(IntegerModRing(p), 'x')
+    Zpl = PolynomialRing(IntegerModRing(p**l), 'x')
+    ZZR = PolynomialRing(ZZ, 'x')
 
     r = len(modular_factors)
     if r == 1:
-        return [lifting_domain(f / f.leading_coefficient())]
+        return [ZZR(Zpl(f / f.leading_coefficient()))]
 
     k = floor(r / 2)
     d = ceil(log(l, 2))
-    g = domain(f.leading_coefficient() * prod(modular_factors[:k]))
-    h = domain(prod(modular_factors[k:]))
-    r, s, t, _ = normalized_extended_euclidean_algorithm(g, h)
-    mcd = r[-2]
-    if mcd != domain.one():
+
+    modular_factors_p = map(Zp, modular_factors)
+    g = ZZR(Zp(f.leading_coefficient()) * prod(modular_factors_p[:k]))
+    h = ZZR(prod(modular_factors_p[k:]))
+
+    # TODO: PARTY HARD!
+    rem, s_list, t_list, _ = normalized_extended_euclidean_algorithm(g, h)
+    mcd = rem[-2]
+    if mcd != ZZR.one():
         raise RuntimeError('Arguments should be coprime, but their mcd is {mcd}'.format(mcd=mcd))
-    s_0 = s[-2]
-    t_0 = t[-2]
+    s = s_list[-2]
+    t = t_list[-2]
+    # s = ZZR('-2*x - 1')
+    # t = ZZR('2*x - 1')
 
     for j in range(d):
         g, h, s, t = __hensel_step(p**(2**j), f, g, h, s, t)
@@ -92,7 +99,7 @@ def hensel_lifting_poly_factorization(f):
     """
     Polynomial factorization in Z[x] using Hensel lifting.
 
-    Factors a nonconstant, squarefree, monic polynomial f in Z[x].
+    Factors a nonconstant, squarefree, primitive polynomial f in Z[x].
 
     Parameters
     ----------
@@ -109,68 +116,69 @@ def hensel_lifting_poly_factorization(f):
     if not base_domain.is_ring() or not base_domain == IntegerRing():
         raise ValueError("The base domain must be the integer ring")
 
-    if f.degree() < 1:
-        raise ValueError("f must be a nonconstant polynomial")
-    if not f.is_monic():
-        raise ValueError("f must be a monic polynomial")
-    if not f.is_squarefree():
-        raise ValueError("f must be squarefree")
+    if f.degree() < 1 or not f.is_squarefree() or not f.is_primitive():
+        raise ValueError("f must be a nonconstant, squarefree, primitive polynomial")
 
     n = f.degree()
     if n == 1:
         return [f]
 
     A = base_domain(f.norm(Infinity))
-    B = sqrt(n + 1) * 2**n * A
+    b = f.leading_coefficient()
+    B = sqrt(n + 1) * 2**n * A * b
     C = (n + 1)**(2*n) * A**(2*n - 1)
     gamma = ceil(2 * log(C, 2))
 
     p = 2
     while p <= 2*gamma*log(gamma):
-        F_px = PolynomialRing(GF(p), 'x')
-        f_bar = F_px(f)
-        if gcd_ufd(f_bar, f_bar.diff()) != F_px.one():
-            break
+        if b % p != 0:
+            Zp = PolynomialRing(IntegerModRing(p), 'x')
+            f_bar = Zp(f)
+            # TODO: PARTY HARD!
+            # if gcd_ufd(f_bar, f_bar.diff()) != Zp.one():
+            #     break
+            if f_bar.is_squarefree():
+                break
         p = next_prime(p)
 
     if p > 2*gamma*log(gamma):  # Should never happen
         raise RuntimeError("Couldn't find such a prime")
 
     # Modular factorization
-    F_px = PolynomialRing(GF(p), 'x')
-    f_bar = F_px(f)
-    modular_factors = berlekamp_poly_factorization(f_bar)  # TODO: f can be nonmonic
+    Zp = PolynomialRing(IntegerModRing(p), 'x')
+    f_bar = Zp(f)
 
-    print type(modular_factors[0])
-    print modular_factors[0].parent()
-    print modular_factors[0].parent().base()
-    print modular_factors[0]
-    return []
+    # TODO: PARTY HARD!
+    modular_factors = berlekamp_poly_factorization(f_bar)
+    # modular_factors = [Zp('x - 1'), Zp('x - 2'), Zp('x + 2'), Zp('x + 1')]
+
+    ZZR = PolynomialRing(ZZ, 'x')
+    modular_factors = map(ZZR, modular_factors)
 
     # Hensel lifting
     l = ceil(log(2*B + 1, p))
+    # TODO: PARTY HARD!
     modular_factors = __multifactor_hensel_lifting(f, p, l, modular_factors)
-
-    F_plx = PolynomialRing(IntegerModRing(p**l), 'x')
+    # modular_factors = [ZZR('x - 5136'), ZZR('x - 984'), ZZR('x - 72'), ZZR('x - 6828')]
 
     # The set of modular factors still to be treated, the set of factors found, and the polynomial f_ still to be
     # factored.
-    modular_factors = Set(map(F_plx, modular_factors))  #TODO: hace falta castear a F_plx?
+    Zpl = PolynomialRing(IntegerModRing(p ** l), 'x')
+    modular_factors = Set(map(Zpl, modular_factors))
     s = 1
-    b = 1
     factors = []
     f_ = f
 
     # Factor combination
     while 2*s <= len(modular_factors):
         for S in Subsets(modular_factors, s):
-            g_ = F_plx(b) * prod(S)
-            h_ = F_plx(b) * prod(modular_factors.difference(S))
+            g_ = ZZR(Zpl(b) * prod(S))
+            h_ = ZZR(Zpl(b) * prod(modular_factors.difference(S)))
 
-            if domain(g_).norm(1) * domain(h_).norm(1) <= B:
+            if g_.norm(1) * h_.norm(1) <= B:
                 modular_factors = modular_factors.difference(S)
-                factors.append(domain(g_ / poly_content(g_)))  # Primitive part
-                f_ = domain(h_ / poly_content(h_))
+                factors.append(ZZR(g_ / poly_content(g_)))  # Primitive part  # TODO: Check poly_content with gcd_ufd?
+                f_ = ZZR(h_ / poly_content(h_))
                 b = f_.leading_coefficient()
                 break  # Exit the for loop and continue the while loop
 
@@ -183,13 +191,18 @@ def hensel_lifting_poly_factorization(f):
 def main():
     """ Execute the examples. """
 
-    R = PolynomialRing(ZZ, 'x')
-    f = R('x^4 - 1')
-    g = R('x^3 + 2*x^2 - x - 2')
-    h = R('x - 2')
-    s = R('-2')
-    t = R('2*x^2 - 2*x - 1')
-    print __hensel_step(5, f, g, h, s, t)
+    # R = PolynomialRing(ZZ, 'x')
+    # f = R('x^4 - 1')
+    # g = R('x^3 + 2*x^2 - x - 2')
+    # h = R('x - 2')
+    # s = R('-2')
+    # t = R('2*x^2 - 2*x - 1')
+    # print __hensel_step(5, f, g, h, s, t)
+
+    # print __multifactor_hensel_lifting(f, 5, 4, [R('x - 1'), R('x - 2'), R('x + 2'), R('x + 1')])
+
+    # f2 = R('6*x^4 + 5*x^3 + 15*x^2 + 5*x + 4')
+    # print hensel_lifting_poly_factorization(f2)
 
 
 if __name__ == '__main__':
