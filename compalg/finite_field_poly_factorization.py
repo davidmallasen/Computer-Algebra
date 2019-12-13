@@ -330,20 +330,23 @@ def __berlekamp(f):
     return factors
 
 
-def berlekamp_poly_factorization(f):
+def berlekamp_poly_factorization(f, squarefree=False):
     """
     Polynomial factorization in a finite field.
 
     Factors a nonconstant monic polynomial f in a finite field F_q[x], where q is a prime power q = p^r.
     Applies berlekamp's algorithm.
+    If squarefree is True, does not try to decompose the polynomial into its squarefree parts and returns just the
+    irreducible factors, without their degree.
 
     Parameters
     ----------
     f : A nonconstant, monic polynomial in F_q[x].
+    squarefree:
 
     Returns
     -------
-    The factorization [(f_1, s_1), ..., (f_k, s_k)] of f.
+    The factorization [(f_1, s_1), ..., (f_k, s_k)] of f or just [f_1, ..., f_k] if squarefree is set to True.
     """
 
     field = f.parent()
@@ -358,9 +361,14 @@ def berlekamp_poly_factorization(f):
         raise ValueError("f must be a monic polynomial")
 
     irreducible_factors = []
-    for squarefree, power in squarefree_decomposition(f):
-        for irreducible_factor in __berlekamp(squarefree):
-            irreducible_factors.append((irreducible_factor, power))
+
+    if not squarefree:
+        for squarefree, power in squarefree_decomposition(f):
+            for irreducible_factor in __berlekamp(squarefree):
+                irreducible_factors.append((irreducible_factor, power))
+    else:
+        for irreducible_factor in __berlekamp(f):
+            irreducible_factors.append(irreducible_factor)
 
     return irreducible_factors
 
