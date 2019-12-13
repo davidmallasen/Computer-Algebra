@@ -78,15 +78,13 @@ def __multifactor_hensel_lifting(f, p, l, modular_factors):
     g = ZZR(Zp(f.leading_coefficient()) * prod(modular_factors_p[:k]))
     h = ZZR(prod(modular_factors_p[k:]))
 
-    # TODO: PARTY HARD!
-    rem, s_list, t_list, _ = normalized_extended_euclidean_algorithm(g, h)
+    Fp = PolynomialRing(GF(p), 'x')
+    rem, s_list, t_list, _ = normalized_extended_euclidean_algorithm(Fp(g), Fp(h))
     mcd = rem[-2]
     if mcd != ZZR.one():
         raise RuntimeError('Arguments should be coprime, but their mcd is {mcd}'.format(mcd=mcd))
-    s = s_list[-2]
-    t = t_list[-2]
-    # s = ZZR('-2*x - 1')
-    # t = ZZR('2*x - 1')
+    s = ZZR(s_list[-2])
+    t = ZZR(t_list[-2])
 
     for j in range(d):
         g, h, s, t = __hensel_step(p**(2**j), f, g, h, s, t)
@@ -132,11 +130,8 @@ def hensel_lifting_poly_factorization(f):
     p = 2
     while p <= 2*gamma*log(gamma):
         if b % p != 0:
-            Zp = PolynomialRing(IntegerModRing(p), 'x')
-            f_bar = Zp(f)
-            # TODO: PARTY HARD!
-            # if gcd_ufd(f_bar, f_bar.diff()) != Zp.one():
-            #     break
+            Fp = PolynomialRing(GF(p), 'x')
+            f_bar = Fp(f)
             if f_bar.is_squarefree():
                 break
         p = next_prime(p)
@@ -145,21 +140,17 @@ def hensel_lifting_poly_factorization(f):
         raise RuntimeError("Couldn't find such a prime")
 
     # Modular factorization
-    Zp = PolynomialRing(IntegerModRing(p), 'x')
-    f_bar = Zp(f)
+    Fp = PolynomialRing(GF(p), 'x')
+    f_bar = Fp(f)
 
-    # TODO: PARTY HARD!
-    modular_factors = berlekamp_poly_factorization(f_bar)
-    # modular_factors = [Zp('x - 1'), Zp('x - 2'), Zp('x + 2'), Zp('x + 1')]
+    modular_factors = berlekamp_poly_factorization(f_bar, squarefree=True)
 
     ZZR = PolynomialRing(ZZ, 'x')
     modular_factors = map(ZZR, modular_factors)
 
     # Hensel lifting
     l = ceil(log(2*B + 1, p))
-    # TODO: PARTY HARD!
     modular_factors = __multifactor_hensel_lifting(f, p, l, modular_factors)
-    # modular_factors = [ZZR('x - 5136'), ZZR('x - 984'), ZZR('x - 72'), ZZR('x - 6828')]
 
     # The set of modular factors still to be treated, the set of factors found, and the polynomial f_ still to be
     # factored.
@@ -177,7 +168,7 @@ def hensel_lifting_poly_factorization(f):
 
             if g_.norm(1) * h_.norm(1) <= B:
                 modular_factors = modular_factors.difference(S)
-                factors.append(ZZR(g_ / poly_content(g_)))  # Primitive part  # TODO: Check poly_content with gcd_ufd?
+                factors.append(ZZR(g_ / poly_content(g_)))  # Primitive part
                 f_ = ZZR(h_ / poly_content(h_))
                 b = f_.leading_coefficient()
                 break  # Exit the for loop and continue the while loop
@@ -191,18 +182,20 @@ def hensel_lifting_poly_factorization(f):
 def main():
     """ Execute the examples. """
 
-    # R = PolynomialRing(ZZ, 'x')
-    # f = R('x^4 - 1')
-    # g = R('x^3 + 2*x^2 - x - 2')
-    # h = R('x - 2')
-    # s = R('-2')
-    # t = R('2*x^2 - 2*x - 1')
-    # print __hensel_step(5, f, g, h, s, t)
+    R = PolynomialRing(ZZ, 'x')
 
-    # print __multifactor_hensel_lifting(f, 5, 4, [R('x - 1'), R('x - 2'), R('x + 2'), R('x + 1')])
+    f = R('x^4 - 1')
+    g = R('x^3 + 2*x^2 - x - 2')
+    h = R('x - 2')
+    s = R('-2')
+    t = R('2*x^2 - 2*x - 1')
+    print __hensel_step(5, f, g, h, s, t)  # Expected: (x^3 + 7*x^2 - x - 7, x - 7, 8, -8*x^2 - 12*x - 1)
 
-    # f2 = R('6*x^4 + 5*x^3 + 15*x^2 + 5*x + 4')
-    # print hensel_lifting_poly_factorization(f2)
+    # Expected: [x - 1, x - 182, x + 182, x + 1]
+    print __multifactor_hensel_lifting(f, 5, 4, [R('x - 1'), R('x - 2'), R('x + 2'), R('x + 1')])
+
+    f2 = R('6*x^4 + 5*x^3 + 15*x^2 + 5*x + 4')
+    print hensel_lifting_poly_factorization(f2)  # Expected: [3*x^2 + x + 1, 2*x^2 + x + 4]
 
 
 if __name__ == '__main__':
