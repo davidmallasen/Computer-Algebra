@@ -5,8 +5,8 @@ Includes the three step polynomial factorization algorithm and Berlekamp's algor
 from sage.all import *
 
 from auxiliary_algorithms import repeated_square, poly_pth_root
-from gcd_ufd import gcd_ufd
 from finite_field_inverse import inverse_element
+from gcd_ufd import gcd_ufd
 
 
 def squarefree_decomposition(f):
@@ -302,7 +302,7 @@ def __null_space_basis(M):
 def __berlekamp(f):
     """
     Given a square-free polynomial f in a finite field F_q[x], calculate irreducible factors f_1(x), ..., f_k(x) such
-    that f(x) = f_1(x) * ... * f_k(x)
+    that f(x) = f_1(x) * ... * f_k(x).
     """
 
     field = f.parent()
@@ -342,7 +342,7 @@ def berlekamp_poly_factorization(f, squarefree=False):
     Parameters
     ----------
     f : A nonconstant, monic polynomial in F_q[x].
-    squarefree:
+    squarefree: If f is known to be squarefree.
 
     Returns
     -------

@@ -1,8 +1,9 @@
 """
 Computation of the inverse in a finite field.
 """
-from extended_euclidean_algorithm import normalized_extended_euclidean_algorithm
 from sage.all import *
+
+from extended_euclidean_algorithm import normalized_extended_euclidean_algorithm
 
 
 def inverse_element(a):
@@ -27,7 +28,8 @@ def __inverse_element(a, f_mod):
     """
     Inverse in a finite field.
 
-    Returns the inverse of the given element.
+    Returns the inverse of the given element. Both arguments must belong to the same finite field, with a prime number
+    of elements.
 
     Parameters
     ----------
@@ -35,11 +37,9 @@ def __inverse_element(a, f_mod):
     f_mod : the polynomial to calculate the inverse with. We will calculate a^-1 in base_field / f_mod. f_mod must be
     irreducible.
 
-    Both arguments must belong to the same finite field, with a prime number of elements.
-
     Returns
     -------
-    Its inverse
+    Its inverse.
     """
 
     base_field = a.parent().base()
@@ -60,7 +60,7 @@ def main():
     R = PolynomialRing(Z5, 'x')
     f = R('x^3 - x + 2')
     a = R('x^2')
-    print(__inverse_element(a, f))    # Expected x^2 + 2x - 1
+    print(__inverse_element(a, f))  # Expected x^2 + 2x - 1
 
     Z11 = GF(11)
     R = PolynomialRing(Z11, 'x')

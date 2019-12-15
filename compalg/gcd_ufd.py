@@ -3,6 +3,7 @@ GCD computing for members of any UCD.
 """
 from sage.all import *
 from sage.rings.polynomial.polynomial_ring import is_PolynomialRing
+
 from euclidean_algorithm import euclidean_algorithm
 
 
@@ -10,6 +11,7 @@ def __poly_content(f):
     """
     Computes the polynomial content for the given polynomial.
     """
+
     return reduce(euclidean_algorithm, f.coefficients())
 
 
@@ -17,8 +19,8 @@ def __gcd_ufd_primitive_polynomial(f, g):
     """
     GCD computing.
 
-    Returns one gcd of two elements f, g belonging to a ring whose base ring is an Euclidean domain.
-    for f, g primitive polynomials.
+    Returns one gcd of two elements f, g belonging to a ring whose base ring is an Euclidean domain for f, g primitive
+    polynomials. Doesn't check for consistency, this should happen in the caller method.
 
     Parameters
     ----------
@@ -29,8 +31,6 @@ def __gcd_ufd_primitive_polynomial(f, g):
     -------
     The gcd.
     """
-
-    # No consistency checks, those should happen in the caller method
 
     domain = f.parent()
     base_domain = domain.base()
@@ -55,8 +55,8 @@ def gcd_ufd(f, g):
 
     Parameters
     ----------
-    f : the first element
-    g : the second element
+    f : the first element.
+    g : the second element.
 
     Returns
     -------
@@ -76,6 +76,7 @@ def gcd_ufd(f, g):
     if not base_domain.is_euclidean_domain():
         raise ValueError("The base ring for the polynomial ring must be an Euclidean domain")
 
+    # gcd(f, 0) = f, gcd(0, g) = g
     if f == domain.zero():
         if g == domain.zero():
             return domain.zero()
@@ -98,7 +99,7 @@ def gcd_ufd(f, g):
 def main():
     """ Execute the examples. """
     R = PolynomialRing(QQ, 'x')
-    print gcd_ufd(R('x^3 - 1'), R('x - 1'))     # Expected x-1
+    print gcd_ufd(R('x^3 - 1'), R('x - 1'))     # Expected x - 1
 
     S = PolynomialRing(PolynomialRing(GF(5), 'y'), 'x')
     f = S('(y^3 + 3 * y^2 + 2 * y) * x^3 + (y^2 + 3 * y + 2) * x^2 + (y^3 + 3 * y^2 + 2 * y) * x + (y^2 + 3 * y + 2)')

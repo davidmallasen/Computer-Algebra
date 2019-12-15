@@ -14,7 +14,7 @@ def positive_bezout_coefficients(a, b, normal=None):
     Parameters
     ----------
     a : the first element.
-    b : the second element
+    b : the second element.
     normal : a function R -> R, that returns a normal form for a given element (see normalized extended euclidean
             algorithm for more info).
 
@@ -22,22 +22,23 @@ def positive_bezout_coefficients(a, b, normal=None):
     -------
     x, y such that x * a + y * b = 1.
     """
+
     domain = a.parent()
     r, s, t, _ = normalized_extended_euclidean_algorithm(a, b, normal)
-    mcd = r[-2]
-    if mcd == domain.one():
+    gcd = r[-2]
+    if gcd == domain.one():
         return s[-2], t[-2]
     else:
-        raise ValueError('Arguments should be coprime, but their mcd is {mcd}'.format(mcd=mcd))
+        raise ValueError('Arguments should be coprime, but their gcd is {gcd}'.format(gcd=gcd))
 
 
 def chinese_remainder(residues, moduli, normal=None):
     """
     Chinese Remainder Algorithm (CRA).
 
-    Return a solution to a Chinese Remainder Theorem problem. Given an Euclidean Domain ED and
-    two lists of elements in ED of the same length, ''residues'' and ''moduli'', returns an element
-    of DE such that this element is congruent with residues[i] mod moduli[i] for all i.
+    Return a solution to a Chinese Remainder Theorem problem. Given an Euclidean Domain ED and two lists of elements in
+    ED of the same length, ''residues'' and ''moduli'', returns an element in ED such that this element is congruent
+    with residues[i] mod moduli[i] for all i.
 
     Parameters
     ----------
@@ -51,7 +52,7 @@ def chinese_remainder(residues, moduli, normal=None):
     A solution to the Chinese Remainder Theorem for ''residues'' and ''moduli''.
     If the lists are empty, returns ZZ(0).
     """
-    # Check input parameters, if the lists are empty, return ZZ(0)
+
     if not isinstance(residues, list) or not isinstance(moduli, list):
         raise TypeError("Arguments should be lists")
     if len(residues) != len(moduli):
@@ -72,8 +73,7 @@ def chinese_remainder(residues, moduli, normal=None):
         if not isinstance(residues[i], type_) or not isinstance(moduli[i], type_):
             raise TypeError("All the elements of both lists must be in the same Euclidean Domain")
 
-    # Compute the actual solution
-    m = reduce(operator.mul, moduli)
+    m = prod(moduli)
     c = domain.zero()
     for (v_i, m_i) in zip(residues, moduli):
         quo, _ = m.quo_rem(m_i)

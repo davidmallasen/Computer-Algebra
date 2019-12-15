@@ -56,6 +56,7 @@ def discrete_log_bsgs(gen, alpha):
     -------
     A discrete logarithm of alpha.
     """
+
     base_field = gen.parent()
 
     if not gen.parent() == alpha.parent():

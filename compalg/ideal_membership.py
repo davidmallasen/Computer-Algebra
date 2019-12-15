@@ -22,6 +22,7 @@ def is_member(f, I):
     -------
     True if f is a member of the ideal I, False otherwise.
     """
+
     if not is_Ideal(I):
         raise TypeError('Argument should be an ideal')
 
@@ -57,17 +58,17 @@ def main():
     I = poly_ring.ideal(f1, f2)
 
     # Examples generated with sage 'f in I'
-    print is_member(f1, I)      # Expected true
-    print is_member(f2, I)      # Expected true
-    print is_member(f2 * x ** 3, I)     # Expected true
-    print is_member(f1 + f2, I)         # Expected true
-    print is_member(f1 * f2 ** 2, I)    # Expected true
-    print is_member(f1 + f2, I)         # Expected true
+    print is_member(f1, I)      # Expected True
+    print is_member(f2, I)      # Expected True
+    print is_member(f2 * x ** 3, I)     # Expected True
+    print is_member(f1 + f2, I)         # Expected True
+    print is_member(f1 * f2 ** 2, I)    # Expected True
+    print is_member(f1 + f2, I)         # Expected True
 
-    print is_member(x, I)    # Expected false
-    print is_member(y, I)    # Expected false
-    print is_member(poly_ring(1), I)    # Expected false
-    print is_member(x + y, I)    # Expected false
+    print is_member(x, I)    # Expected False
+    print is_member(y, I)    # Expected False
+    print is_member(poly_ring(1), I)    # Expected False
+    print is_member(x + y, I)    # Expected False
 
 
 if __name__ == '__main__':

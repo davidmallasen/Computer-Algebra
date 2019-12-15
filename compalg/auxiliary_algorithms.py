@@ -61,4 +61,5 @@ def poly_content(f):
     """
     Computes the polynomial content of f in Z[x]. The polynomial content is the gcd of its coefficients.
     """
+    
     return f.parent().base()(gcd(map(ZZ, f.coefficients())))

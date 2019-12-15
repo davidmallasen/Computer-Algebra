@@ -13,6 +13,7 @@ def __multidegree(f):
     """
     Computes the multidegree of f.
     """
+
     mon = f.monomials()
     mon.sort()      # Sorts them with the ring order
     return mon[-1].degrees()
@@ -22,6 +23,7 @@ def __s_polynomial(g, h):
     """
     Computes the S-polynomial of g, h.
     """
+
     deg_g = __multidegree(g)
     deg_h = __multidegree(h)
     max_deg = map(max, zip(deg_g, deg_h))
@@ -43,8 +45,8 @@ def __unordered_pairs(l):
 
     If two elements in the list are equal, this method will still consider them as different.
     """
-    return [(l[i], l[j]) for i in range(len(l) - 1) for j in range(i + 1, len(l))]
 
+    return [(l[i], l[j]) for i in range(len(l) - 1) for j in range(i + 1, len(l))]
 
 
 def buchberger_algorithm(I):

@@ -9,13 +9,13 @@ from sage.rings.polynomial.multi_polynomial_ring import is_MPolynomialRing
 def multivariate_division_with_remainder(f, fs):
     """
     Performs multivariate division with remainder, that is, returns quotients q_1, ..., q_s and a remainder r such that
-    q_1 * f_1 + ... + q_s * f_s + r = f, and no monomial in r is divisible by any of lt(f_i).
+    q_1 * f_1 + ... + q_s * f_s + r = f, and no monomial in r is divisible by any of lt(f_i). Both f and all fs must
+    belong to the same multivariate polynomial ring.
 
     Parameters
     ----------
     f : the numerator.
     fs : the list of denominators.
-    Both f and all fs must belong to the same multivariate polynomial ring.
 
     Returns
     -------

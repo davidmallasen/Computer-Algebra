@@ -3,8 +3,8 @@ Irreducibility check in a finite field.
 """
 from sage.all import *
 
-from euclidean_algorithm import euclidean_algorithm
 from auxiliary_algorithms import repeated_square, horners_evaluation
+from euclidean_algorithm import euclidean_algorithm
 from utils import generate_list, filter_with_mask
 
 
@@ -13,13 +13,14 @@ def __next_power_of_2(x):
 
 
 def __matrix_blocks(A, m, n):
-    return A[:m,:n], A[:m,n:], A[m:,:n], A[m:,n:]
+    return A[:m, :n], A[:m, n:], A[m:, :n], A[m:, n:]
 
 
 def __fast_square_matrix_multiplication(A, B):
     """
     Calculates A times B, for A, B square matrices of the same size.
     """
+
     if A.dimensions() != B.dimensions():
         raise ValueError("The matrices must have the same dimensions")
 
@@ -29,7 +30,7 @@ def __fast_square_matrix_multiplication(A, B):
     n = A.dimensions()[0]
 
     if n == 1:
-        return matrix([[A[0,0] * B[0,0]]])
+        return matrix([[A[0, 0] * B[0, 0]]])
 
     pad_n = __next_power_of_2(n)
 
@@ -67,13 +68,14 @@ def __fast_square_matrix_multiplication(A, B):
     U6 = U3 - P4
     U7 = U3 + P5
 
-    return block_matrix([[U1, U5], [U6, U7]], subdivide=False)[:n,:n]
+    return block_matrix([[U1, U5], [U6, U7]], subdivide=False)[:n, :n]
 
 
 def __fast_square_times_arbitrary_matrix_multiplication(A, B):
     """
     A times B, where A is square and B is arbitrary.
     """
+
     if A.dimensions()[0] != A.dimensions()[1]:
         raise ValueError("The first matrix is not square")
 
@@ -84,9 +86,9 @@ def __fast_square_times_arbitrary_matrix_multiplication(A, B):
     # Pad B
     B = block_matrix([B, zero_matrix(m, pad_n - n)], nrows=1, subdivide=False)
 
-    blocks_B = [B[:,i:(i+m)] for i in range(0, pad_n, m)]
+    blocks_B = [B[:, i:(i+m)] for i in range(0, pad_n, m)]
     blocks_prod = map(lambda block: A * block, blocks_B)
-    return block_matrix(blocks_prod, nrows=1, subdivide=False)[:,:n]
+    return block_matrix(blocks_prod, nrows=1, subdivide=False)[:, :n]
 
 
 def __padded_coefficients(f, pad_to):
@@ -96,7 +98,7 @@ def __padded_coefficients(f, pad_to):
 
 def __fast_modular_composition(f, g, h):
     """
-    Computes g(h) mod f.
+    Computes g(h) mod f. The polynomials must have: deg g, deg h < deg f.
 
     Parameters
     ----------
@@ -104,12 +106,11 @@ def __fast_modular_composition(f, g, h):
     g : a polynomial.
     h : a polynomial.
 
-    The polynomials must have: deg g, deg h < deg f
-
     Returns
     -------
     g(h) mod f.
     """
+
     poly_ring = f.parent()
     n = f.degree()
     m = integer_ceil(sqrt(n))

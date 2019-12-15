@@ -3,17 +3,15 @@ Factoring algorithm in Z[x].
 """
 from sage.all import *
 
-from extended_euclidean_algorithm import normalized_extended_euclidean_algorithm
-from gcd_ufd import gcd_ufd
-from finite_field_poly_factorization import berlekamp_poly_factorization
 from auxiliary_algorithms import poly_content
-
-# Modern-Computer-Algebra.pdf p.433 seccion 15.1 En Z[x] y Q[x]
-# compalg-2017-18.pdf p.55 seccion 2.4.2 Hensel lifting
+from extended_euclidean_algorithm import normalized_extended_euclidean_algorithm
+from finite_field_poly_factorization import berlekamp_poly_factorization
 
 
 def __hensel_step(m, f, g, h, s, t):
     """
+    Hensel step.
+
     Parameters
     ----------
     m: module
@@ -50,13 +48,15 @@ def __hensel_step(m, f, g, h, s, t):
 
 def __multifactor_hensel_lifting(f, p, l, modular_factors):
     """
+    Multifactor Hensel lifting.
+
     Parameters
     ----------
     f: Polynomial in Z[x] of degree n >= 1 such that its leading coefficient is a unit modulo p.
     p: an integer as needed by f and modular_factors.
     l: a natural number as needed by modular_factors.
     modular_factors: monic, nonconstant polynomials f_1, ..., f_r in Z[x] that are pairwise Bezout-coprime modulo p and
-                        satisfy f = lc(f) * f_1 * ... * f_r mod p
+                        satisfy f = lc(f) * f_1 * ... * f_r mod p.
 
     Returns
     -------
@@ -101,7 +101,7 @@ def hensel_lifting_poly_factorization(f):
 
     Parameters
     ----------
-    f : A nonconstant, monic polynomial in Z[x]
+    f : A nonconstant, monic polynomial in Z[x].
 
     Returns
     -------

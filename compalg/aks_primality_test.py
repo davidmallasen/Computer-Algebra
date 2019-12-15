@@ -1,9 +1,10 @@
 """
 AKS primality test.
 """
-
 from sage.all import *
+
 from euclidean_algorithm import euclidean_algorithm
+
 import timeit
 
 
@@ -11,8 +12,9 @@ def __sieve_of_eratosthenes(n):
     """
     Computes a list of prime numbers up to n.
 
-    Complexity: (log n) (log log log n)
+    Complexity: (log n) (log log log n).
     """
+
     if n < 2:
         return []
 
@@ -33,8 +35,9 @@ def __is_perfect_power(n):
     Checks if n can be written as a^b with b > 1.
 
     Algorithm A from http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.108.458&rep=rep1&type=pdf.
-    Complexity (log^3 n) (log log log n)
+    Complexity (log^3 n) (log log log n).
     """
+
     max_b = integer_floor(log(n, 2))
 
     for p in __sieve_of_eratosthenes(max_b):

@@ -1,7 +1,6 @@
 """
 Extended euclidean algorithm (gcd).
 """
-import operator
 from sage.all import *
 from sage.rings.polynomial.polynomial_ring import is_PolynomialRing
 
@@ -12,8 +11,8 @@ def extended_euclidean_algorithm(f, g):
 
     Parameters
     ----------
-    f : the first element
-    g : the second element
+    f : the first element.
+    g : the second element.
 
     Returns
     -------
@@ -52,6 +51,7 @@ def __lu(a, normal):
     """
     The leading unit of a, that is, the unit u such as a = u * normal(a).
     """
+
     if a.is_zero():
         return a.parent().one()
 
@@ -59,17 +59,17 @@ def __lu(a, normal):
     return quo
 
 
-def normalized_extended_euclidean_algorithm(f, g, normal = None):
+def normalized_extended_euclidean_algorithm(f, g, normal=None):
     """
     Normalized extended euclidean Algorithm.
 
     Parameters
     ----------
-    f : the first element, belonging to the euclidean domain R
-    g : the second element, belonging to the euclidean domain R
-    normal : a function R -> R, that returns a normal form for a given element (that is, given a, it returns a value
-            normal(a) such that there exists an unit u such that a = u * normal(a). If set to None, an adequate normal
-            will be generated if possible, and else an error will be thrown.
+    f : the first element, belonging to the euclidean domain R.
+    g : the second element, belonging to the euclidean domain R.
+    normal : a function R -> R, that returns a normal form for a given element. That is, given a, it returns a value
+            normal(a) such that there exists a unit u such that a = u * normal(a). If set to None, an adequate normal
+            will be generated if possible, and else a ValueError will be thrown.
 
     Returns
     -------
@@ -117,7 +117,9 @@ def result_to_pretty_string(f, g, rs, ss, ts):
     """
     Creates a nicely formatted string using the result from the algorithm.
     """
-    return '\n'.join(map(lambda (r, s, t): '{r} = ({s}) * ({f}) + ({t}) * ({g})'.format(r=r, s=s, t=t, f=f, g=g), zip(rs, ss, ts)))
+
+    return '\n'.join(map(lambda (r, s, t): '{r} = ({s}) * ({f}) + ({t}) * ({g})'.format(r=r, s=s, t=t, f=f, g=g),
+                         zip(rs, ss, ts)))
 
 
 def main():

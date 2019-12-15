@@ -1,7 +1,6 @@
 """
 Euclidean algorithm (gcd).
 """
-import operator
 from sage.all import *
 
 
@@ -13,8 +12,8 @@ def euclidean_algorithm(f, g):
 
     Parameters
     ----------
-    f : the first element
-    g : the second element
+    f : the first element.
+    g : the second element.
 
     Returns
     -------
@@ -45,7 +44,7 @@ def main():
     print euclidean_algorithm(ZZ(33461), ZZ(236322))  # Expected 1
 
     R = PolynomialRing(QQ, 'x')
-    print euclidean_algorithm(R('x^2 - 1'), R('x + 1'))  # Expected x+1
+    print euclidean_algorithm(R('x^2 - 1'), R('x + 1'))  # Expected x + 1
     print euclidean_algorithm(R('x + 1'), R('x + 2'))  # Expected 1 (or -1)
 
 
