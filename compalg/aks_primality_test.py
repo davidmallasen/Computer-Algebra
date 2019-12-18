@@ -126,7 +126,7 @@ def main():
         print 'Checked primality of {p} in time {t}s'.format(p=p, t=elapsed)
 
     start, end = 2, 200
-    for n in range(2, 200):
+    for n in range(start, end):
         print 'Started test for n = {n}'.format(n=n)
         if aks_is_prime(n) != is_prime(n):
             print 'The AKS implementation is wrong for {n}'.format(n=n)
