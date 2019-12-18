@@ -61,7 +61,6 @@ def miller_rabin_is_prime(n, k=10):
             # a is a witness, so the number is composite
             return False
 
-
     # If none of the iterations have found a witness, then n is probably prime
     return True
 
