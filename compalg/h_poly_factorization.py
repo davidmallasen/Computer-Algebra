@@ -4,7 +4,7 @@ Factoring algorithm in Z[x].
 from sage.all import *
 
 from __auxiliary_algorithms import poly_content
-from a2 import normalized_extended_euclidean_algorithm
+from a2_extended_euclidean_algorithm import normalized_extended_euclidean_algorithm
 from g_finite_field_poly_factorization import berlekamp_poly_factorization
 
 
