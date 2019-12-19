@@ -15,13 +15,14 @@ def __multidegree(f):
     """
 
     mon = f.monomials()
-    mon.sort()      # Sorts them with the ring order
-    return mon[-1].degrees()
+    mon.sort()      # Sorts them with the polynomial ring order
+    return mon[-1].degrees()    # The multidegree is the degree of the biggest monomial
 
 
 def __s_polynomial(g, h):
     """
-    Computes the S-polynomial of g, h.
+    Computes the S-polynomial of g, h. The S-polynomial is a polynomial built explicitly so that the leading terms
+    cancel when combining g and h linearly.
     """
 
     deg_g = __multidegree(g)
@@ -75,6 +76,10 @@ def buchberger_algorithm(I):
 
     if not base_field.is_field():
         raise TypeError('The ideal should be of a polynomial ring over a field')
+
+    # Idea of the algorithm: we will check if the basis is already Groebner by checking that
+    # S(gi, gj) rem (g1, ..., gs) = 0 for each pair (gi, gj). If it is not, we add that S(gi, gj) to the basis to force
+    # it to be true.
 
     # Initialize G with the generators of the ideal
     G = list(I.basis)
