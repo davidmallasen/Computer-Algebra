@@ -32,6 +32,10 @@ def __gcd_ufd_primitive_polynomial(f, g):
     The gcd.
     """
 
+    # We convert the polynomials to polynomials in the fraction field. Since polynomials over a field are an euclidean
+    # domain, we can apply the euclidean algorithm to get the gcd of the monic polynomials and the gcd of the leading
+    # coefficients. We then adjust the result to be primitive, since the gcd of primitive polynomials is primitive.
+
     domain = f.parent()
     base_domain = domain.base()
     fraction_field_base = base_domain.fraction_field()
@@ -85,6 +89,8 @@ def gcd_ufd(f, g):
     else:
         if g == domain.zero():
             return f
+
+    # We use the well known equalities: c(gcd(f, g)) = gcd(c(f), c(g)), pp(gcd(f, g)) = gcd(pp(f), pp(g)).
 
     cont_f, cont_g = __poly_content(f), __poly_content(g)
     cont_result = euclidean_algorithm(cont_f, cont_g)

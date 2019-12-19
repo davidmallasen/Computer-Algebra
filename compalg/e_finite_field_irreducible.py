@@ -9,16 +9,24 @@ from __utils import generate_list, filter_with_mask
 
 
 def __next_power_of_2(x):
+    """
+    Returns the smallest r such that x < 2^r.
+    """
     return 1 if x == 0 else 1 << (x - 1).bit_length()
 
 
 def __matrix_blocks(A, m, n):
+    """
+    Returns a list of four matrix blocks, where the first block is of size (m, n).
+    """
     return A[:m, :n], A[:m, n:], A[m:, :n], A[m:, n:]
 
 
 def __fast_square_matrix_multiplication(A, B):
     """
-    Calculates A times B, for A, B square matrices of the same size.
+    Calculates A times B, for A, B square matrices of the same size. It divides both matrices in equal-sized blocks
+    (padding with zeroes if needed), then calculates useful matrices of the same size and calls this method recursively
+    to multiply them. Finally, the product is recreated from the blocks.
     """
 
     if A.dimensions() != B.dimensions():
@@ -73,7 +81,8 @@ def __fast_square_matrix_multiplication(A, B):
 
 def __fast_square_times_arbitrary_matrix_multiplication(A, B):
     """
-    A times B, where A is square and B is arbitrary.
+    A times B, where A is square and B is arbitrary. It uses the fast matrix multiplication algorithm by dividing the
+    matrix B into square blocks, with the last block padded by zeroes if necessary.
     """
 
     if A.dimensions()[0] != A.dimensions()[1]:
@@ -92,6 +101,9 @@ def __fast_square_times_arbitrary_matrix_multiplication(A, B):
 
 
 def __padded_coefficients(f, pad_to):
+    """
+    Returns the list of coefficients of a polynomial, adding zeroes if necessary to make the list of size pad_to.
+    """
     coefs = f.coefficients(sparse=False)
     return coefs + [f.parent().base().zero()] * (pad_to - len(coefs))
 
@@ -137,7 +149,7 @@ def __fast_modular_composition(f, g, h):
 
 def __prime_divisors(n):
     """
-    Calculates all prime divisors of n.
+    Calculates all prime divisors of n naively.
     """
     candidate = 2
     primes = []
@@ -175,24 +187,40 @@ def is_irreducible(f):
     if not base_field.is_field() or not base_field.is_finite():
         raise ValueError("The base field must be a finite field")
 
+    # The algorithm is based on a corollary stating that a polynomial over a finite field is irreducible iff
+    # f | (x^(q^n) - x) and for each prime divisor t of n, gcd(x^(q^(n/t)), f) = 1.
+
     n = f.degree()
     q = base_field.order()
     x = poly_field(poly_field.variable_name())
+
+    # Step 1: compute x^q mod f, and then a = x^(q^n) mod f. If a != x, then it is reducible
     x_power = repeated_square(x, q, f)
 
+    # The trick here is that we can calculate x^(q^(2^r)) easily for all r, since we can just use fast modular
+    # composition to double the exponent r times, starting with x_power.
     x_powers_of_two = generate_list(lambda x: __fast_modular_composition(f, x, x), x_power, n.nbits())
+
+    # Once we have all those easily calculated powers, we can compose the ones that we need: those with a 1 on their
+    # binary representation.
+    # For example, if n = 5, we take x^q and x^(q^4), we compose them, and then we have (x^q)^(q^4) = x^(q * q^4) =
+    # x^(q^(1+4)) = x^(q^5), just what we wanted.
     x_q_n = reduce(lambda a, b: __fast_modular_composition(f, a, b), filter_with_mask(n, x_powers_of_two))
 
     if x != x_q_n:
         return False    # Reducible
 
+    # Step 2: for all prime divisors...
     for prime in __prime_divisors(n):
+        # Step 3: compute b = , using the same trick as in step 1.
+        # If gcd(b - x, f) != 1, then it is reducible.
         exp = n / prime
         x_q_exp = reduce(lambda a, b: __fast_modular_composition(f, a, b), filter_with_mask(exp, x_powers_of_two))
 
         if not euclidean_algorithm(x_q_exp - x, f).is_unit():
             return False    # Reducible
 
+    # Step 4: if we reached this point, it is irreducible
     return True     # Irreducible
 
 
