@@ -3,9 +3,9 @@ Irreducibility check in a finite field.
 """
 from sage.all import *
 
-from auxiliary_algorithms import repeated_square, horners_evaluation
-from euclidean_algorithm import euclidean_algorithm
-from utils import generate_list, filter_with_mask
+from __auxiliary_algorithms import repeated_square, horners_evaluation
+from a1_euclidean_algorithm import euclidean_algorithm
+from __utils import generate_list, filter_with_mask
 
 
 def __next_power_of_2(x):

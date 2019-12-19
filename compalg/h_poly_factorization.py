@@ -3,9 +3,9 @@ Factoring algorithm in Z[x].
 """
 from sage.all import *
 
-from auxiliary_algorithms import poly_content
-from extended_euclidean_algorithm import normalized_extended_euclidean_algorithm
-from finite_field_poly_factorization import berlekamp_poly_factorization
+from __auxiliary_algorithms import poly_content
+from a2 import normalized_extended_euclidean_algorithm
+from g_finite_field_poly_factorization import berlekamp_poly_factorization
 
 
 def __hensel_step(m, f, g, h, s, t):

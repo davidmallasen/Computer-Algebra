@@ -3,7 +3,7 @@ AKS primality test.
 """
 from sage.all import *
 
-from euclidean_algorithm import euclidean_algorithm
+from a1_euclidean_algorithm import euclidean_algorithm
 
 import timeit
 

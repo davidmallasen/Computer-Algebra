@@ -3,7 +3,7 @@ Chinese remainder theorem algorithm (compute the inverse).
 """
 from sage.all import *
 
-from extended_euclidean_algorithm import normalized_extended_euclidean_algorithm
+from a2 import normalized_extended_euclidean_algorithm
 
 
 def positive_bezout_coefficients(a, b, normal=None):

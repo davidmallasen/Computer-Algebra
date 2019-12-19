@@ -2,8 +2,8 @@
 Ideal membership algorithm. Does an element belong to a given ideal?
 """
 from sage.all import *
-from buchberger_algorithm import buchberger_algorithm
-from multivariate_division import multivariate_division_with_remainder
+from x1_buchberger_algorithm import buchberger_algorithm
+from x3_multivariate_division import multivariate_division_with_remainder
 from sage.rings.polynomial.polynomial_ring import is_PolynomialRing
 from sage.rings.polynomial.multi_polynomial_ring import is_MPolynomialRing
 from sage.rings.ideal import is_Ideal

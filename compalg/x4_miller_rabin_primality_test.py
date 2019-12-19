@@ -3,10 +3,10 @@ AKS primality test.
 """
 from sage.all import *
 
-from euclidean_algorithm import euclidean_algorithm
+from a1_euclidean_algorithm import euclidean_algorithm
 
 import timeit
-from auxiliary_algorithms import repeated_square
+from _auxiliary_algorithms import repeated_square
 
 
 def miller_rabin_is_prime(n, k=10):

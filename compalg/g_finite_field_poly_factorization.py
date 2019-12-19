@@ -4,9 +4,9 @@ Includes the three step polynomial factorization algorithm and Berlekamp's algor
 """
 from sage.all import *
 
-from auxiliary_algorithms import repeated_square, poly_pth_root
-from finite_field_inverse import inverse_element
-from gcd_ufd import gcd_ufd
+from __auxiliary_algorithms import repeated_square, poly_pth_root
+from d_finite_field_inverse import inverse_element
+from c_gcd_ufd import gcd_ufd
 
 
 def squarefree_decomposition(f):

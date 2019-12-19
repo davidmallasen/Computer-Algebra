@@ -4,7 +4,7 @@ GCD computing for members of any UCD.
 from sage.all import *
 from sage.rings.polynomial.polynomial_ring import is_PolynomialRing
 
-from euclidean_algorithm import euclidean_algorithm
+from a1_euclidean_algorithm import euclidean_algorithm
 
 
 def __poly_content(f):

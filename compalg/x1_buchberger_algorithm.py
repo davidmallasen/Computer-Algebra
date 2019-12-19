@@ -1,7 +1,7 @@
 """
 Buchberger algorithm.
 """
-from multivariate_division import multivariate_division_with_remainder
+from x3_multivariate_division import multivariate_division_with_remainder
 from sage.all import *
 from sage.rings.polynomial.polynomial_ring import is_PolynomialRing
 from sage.rings.polynomial.multi_polynomial_ring import is_MPolynomialRing

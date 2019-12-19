@@ -3,7 +3,7 @@ Computation of the inverse in a finite field.
 """
 from sage.all import *
 
-from extended_euclidean_algorithm import normalized_extended_euclidean_algorithm
+from a2 import normalized_extended_euclidean_algorithm
 
 
 def inverse_element(a):
