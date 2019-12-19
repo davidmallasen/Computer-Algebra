@@ -25,8 +25,8 @@ def discrete_log_brute(gen, alpha):
     if not gen.parent() == alpha.parent():
         raise ValueError("Both elements must belong to the same finite field")
 
-    if not base_field.is_field() or not base_field.is_finite() or not base_field.characteristic().is_prime():
-        raise ValueError("The base field must be a finite field with a prime number of elements")
+    if not base_field.is_field() or not base_field.is_finite():
+        raise ValueError("The base field must be a finite field")
 
     order = base_field.order()
     b = base_field.one()
@@ -62,8 +62,8 @@ def discrete_log_bsgs(gen, alpha):
     if not gen.parent() == alpha.parent():
         raise ValueError("Both elements must belong to the same finite field")
 
-    if not base_field.is_field() or not base_field.is_finite() or not base_field.characteristic().is_prime():
-        raise ValueError("The base field must be a finite field with a prime number of elements")
+    if not base_field.is_field() or not base_field.is_finite():
+        raise ValueError("The base field must be a finite field")
 
     order = base_field.order()
     m = isqrt(order) + 1
